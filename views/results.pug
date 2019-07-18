@@ -1,0 +1,43 @@
+html
+  head
+    title Results
+    link(rel='stylesheet', href='../css/bootstrap.min.css')
+    link(rel='stylesheet', href='../css/styles.css')
+    meta(charset='utf-8')
+  body
+    div.results
+      h1.h3.mb-3 Letterboxd similarity
+      p 
+        span.username #{user1} 
+        | and 
+        span.username #{user2} 
+        | have a similarity score of:
+      h3#score <div class="lds-spinner"><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div><div></div></div>
+      p 
+      | computed using 
+      a(href="https://en.wikipedia.org/wiki/Jaccard_index") Jaccard index
+      br
+      br
+      a.btn.btn-secondary(href="/") Go back ↩
+    script(src='/socket.io/socket.io.js')
+    script.
+      var origin = window.location.origin;
+
+      if (origin === "http://letterboxd.julesbecker.me") {
+        origin = "https://quiet-coast-16094.herokuapp.com"
+      }
+
+      var socket = io.connect(origin);
+
+      socket.on("#{user1}"  + "+" + "#{user2}", function (data) {
+        if (data === null) {
+          data = 0;
+        } else if (typeof data === 'string') {
+          document.getElementById("score").setAttribute("style", "font-size:2rem");
+          document.getElementById("score").classList.add("text-danger");
+          document.getElementById("score").innerHTML = data
+        } else {
+          document.getElementById("score").innerHTML = Math.round(data*10000)/100 + "%"
+        }
+        socket.disconnect();
+      });
